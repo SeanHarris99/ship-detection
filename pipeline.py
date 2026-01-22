@@ -135,19 +135,24 @@ def build_chips(ais: pd.DataFrame, sat_tiles: gpd.GeoDataFrame) -> pd.DataFrame:
         }
     )
 
+    KNOTS_IN_KM = 1.852
+    SECONDS_IN_HOUR = 3600
+    KM_PER_DEGREE = 111.32
+
     intersection["time_delta"] = (
         intersection["pred_time"] - intersection["start_time"]
     ).dt.total_seconds()
-    intersection["travelled"] = (intersection["sog"] * 1.852) * (
-        intersection["time_delta"] / 3600
+    intersection["travelled"] = (intersection["sog"] * KNOTS_IN_KM) * (
+        intersection["time_delta"] / SECONDS_IN_HOUR
     )
 
     intersection["pred_lat"] = (
         intersection["lat"]
-        + (intersection["travelled"] * np.cos(np.radians(intersection["cog"]))) / 111.32
+        + (intersection["travelled"] * np.cos(np.radians(intersection["cog"])))
+        / KM_PER_DEGREE
     )
     intersection["pred_lon"] = intersection["lon"] + (
         intersection["travelled"] * np.sin(np.radians(intersection["cog"]))
-    ) / (111.32 * np.cos(np.radians(intersection["lat"])))
+    ) / (KM_PER_DEGREE * np.cos(np.radians(intersection["lat"])))
 
     return intersection
